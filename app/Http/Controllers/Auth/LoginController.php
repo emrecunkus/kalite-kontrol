@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
@@ -37,8 +36,12 @@ class LoginController extends Controller
             if ($ldapConnection->auth()->attempt($samAccountName, $credentials['password'])) {
                 // Whitelist kontrolü
                 $whitelist = [
+                    'feyzionur.baran' => 'tekniker',
+                    'cagatay.cakir' => 'mühendis',
                     'muhammedemre.cunkus' => 'tekniker',
                     'cagatay.cakir' => 'mühendis',
+                    'stajyer.bt' =>'mühendis',
+                    
                 ];
 
                 if (!array_key_exists($credentials['username'], $whitelist)) {
@@ -50,22 +53,21 @@ class LoginController extends Controller
                 // Kullanıcının rolü session'a kaydediliyor
                 $role = $whitelist[$credentials['username']];
                 $request->session()->put('role', $role);
+                $request->session()->put('name', $credentials['username']); // Kullanıcı adını kaydediyoruz
                 Log::info('Role session\'a kaydedildi', ['role' => $role]);
 
-                // Session verilerini logla (işte buraya yazıyorsun)
+                // Session verilerini logla
                 Log::info('Session verileri', ['session' => $request->session()->all()]);
 
                 // Rol bazlı yönlendirme
                 if ($role === 'tekniker') {
-                    // Tekniker form oluşturma sayfasına yönlendirilir
                     return redirect()->route('tekniker.form');
                 } elseif ($role === 'mühendis') {
-                    // Mühendis atanmış Formlar sayfasına yönlendirilir
                     return redirect()->route('mühendis.assigned');
                 }
             } else {
                 return back()->withErrors([
-                    'username' => 'Invalid credentials.',
+                    'username' => 'Şifre ya da kullanıcı adınız yanlış',
                 ]);
             }
         } catch (\Exception $e) {
@@ -75,15 +77,12 @@ class LoginController extends Controller
         }
     }
 
-    // Controller'da logout işlemi
     public function logout(Request $request)
     {
         // Kullanıcı adını session'dan alıyoruz
         $samAccountName = $request->session()->get('username');
 
-
         if ($samAccountName) {
-            // Observer'a logout olayını bildiriyoruz
             $this->loginObserver->userLoggedOut($samAccountName);
             Log::info('Logout işlemi başarılı. Kullanıcı: ' . $samAccountName);
         } else {

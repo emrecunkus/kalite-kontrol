@@ -93,6 +93,18 @@ return [
             // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
         ],
 
+        'external' => [
+        'driver' => 'sqlsrv',
+        'host' => env('EXTERNAL_DB_HOST', '10.150.140.19'),
+        'port' => env('EXTERNAL_DB_PORT', '1433'),
+        'database' => env('EXTERNAL_DB_DATABASE', 'ASP2024'),
+        'username' => env('EXTERNAL_DB_USERNAME', 'asp_byk_engineer_ro'),
+        'password' => env('EXTERNAL_DB_PASSWORD', '123321Ok'),
+        'charset' => 'utf8',
+        'prefix' => '',
+        'pooling' => false,
+    ],
+
     ],
 
     /*

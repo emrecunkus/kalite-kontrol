@@ -12,11 +12,34 @@ class QualityFormController extends Controller
     // Tekniker formu doldurur
     public function create()
     {
-        $lastSurecId = QualityForm::max('surec_id') ?? 99999;
-        $newSurecId = $lastSurecId + 1;
-        session(['newSurecId' => $newSurecId]);
-        return view('quality_forms.create', compact('newSurecId'));
+        // En son surec_id'yi alıyoruz
+        $lastSurecId = QualityForm::max('surec_id');
+
+        $lastQualityReportNumber = QualityForm::max('quality_report_number');
+        // Eğer bir değer varsa bir artır, yoksa 1'den başlat
+        $newQualityReportNumber = $lastQualityReportNumber ? intval($lastQualityReportNumber) + 1 : 1;
+    
+        // Eğer veritabanında bir ID yoksa, 0'dan başlayacak
+        if ($lastSurecId) {
+            // '01-' kısmını çıkarıyoruz ve sayısal kısmı alıyoruz
+            $lastSurecIdNumber = (int) substr($lastSurecId, 3); // '01-' kısmını çıkarıyoruz
+        } else {
+            $lastSurecIdNumber = 0; // Eğer hiç kayıt yoksa, 0'dan başlayacağız
+        }
+    
+        // Yeni surec_id'yi oluşturuyoruz
+        $newSurecIdNumber = $lastSurecIdNumber + 1;
+    
+        // Yeni ID'yi istediğimiz formata dönüştürüyoruz (örneğin, 01-0000001)
+        $formattedSurecId = '01-' . str_pad($newSurecIdNumber, 7, '0', STR_PAD_LEFT);
+    
+        // Yeni ID'yi session'a kaydediyoruz
+        session(['newSurecId' => $formattedSurecId]);
+    
+        // View'a yeni id'yi gönderiyoruz
+        return view('quality_forms.create', compact('formattedSurecId', 'newQualityReportNumber'));
     }
+    
 
     // Tekniker formu kaydeder
     public function store(Request $request)
@@ -64,10 +87,12 @@ class QualityFormController extends Controller
                 'suspected_supplier_list' => 'nullable|string',
                 'suspected_traceability' => 'nullable|string',
                 'suspected_fake_packaging' => 'nullable|string',
-                'inspected_by' => 'required|string|max:255',
-                'approved_by' => 'required|string|max:255',
+                'inspected_by' => 'nullable|string|max:255',
+                'approved_by' => 'nullable|string|max:255',
+                'inventory_data' => 'nullable|array',
+                'measurement_data' => 'nullable|array',
             ]);
-    
+
             // Dosya yükleme işlemleri 'public' diskine yapılacak
             $fileFields = [
                 'technical_drawing_qdms_file',
@@ -98,30 +123,42 @@ class QualityFormController extends Controller
                 'cabling_electrical_test_file',
                 'suspected_supplier_list_file',
                 'suspected_traceability_file',
-                'suspected_fake_packaging_file'
+                'suspected_fake_packaging_file',
             ];
-    
+
             $uploadedFiles = [];
-    
             foreach ($fileFields as $fileField) {
+                $fieldName = str_replace('_file', '', $fileField);
+
+                if ($request->input($fieldName) === 'evet' && !$request->hasFile($fileField)) {
+                    return back()->withErrors(['error' => "Dosya yüklenmesi zorunludur: " . $fileField]);
+                }
+
                 if ($request->hasFile($fileField)) {
-                    // Dosyayı public diskine kaydediyoruz
-                    $uploadedFiles[$fileField] = $request->file($fileField)->store('files', 'public');
+                    try {
+                        $uploadedFiles[$fileField] = $request->file($fileField)->store('files', 'public');
+                    } catch (\Exception $e) {
+                        return back()->withErrors(['error' => "Dosya yükleme hatası: " . $fileField . ". Hata: " . $e->getMessage()]);
+                    }
                 }
             }
-           // dd($uploadedFiles);
-            // Form verilerini kaydetme
-           // $newSurecId = session('newSurecId');
-            $lastSurecId = QualityForm::max('surec_id') ?? 99999;
+
+            // ID oluşturma işlemleri
+            $lastSurecId = QualityForm::max('surec_id');
+            $lastSurecId = $lastSurecId ? (int) substr($lastSurecId, 3) : 0;
             $newSurecId = $lastSurecId + 1;
+            $formattedSurecId = '01-' . str_pad($newSurecId, 7, '0', STR_PAD_LEFT);
 
-          //  dd($newSurecId);
+            $lastQualityReportNumber = QualityForm::max('quality_report_number');
+            $newQualityReportNumber = $lastQualityReportNumber ? intval($lastQualityReportNumber) + 1 : 1;
 
-          $newForm =QualityForm::create([
+            // Form verilerini kaydetme
+            $newForm = QualityForm::create(attributes: [
+          
                 'document_date' => $validatedData['document_date'] ?? null,
                 'document_no' => 'TKKF/ FR-KYM-247',
                 'part_stock_number' => $validatedData['part_stock_number'] ?? null,
-                'quality_report_number' => $validatedData['quality_report_number'] ?? null,
+                'quality_report_number' => $newQualityReportNumber,
                 'part_description' => $validatedData['part_description'] ?? null,
                 'product_revision' => $validatedData['product_revision'] ?? null,
                 'batch_quantity' => $validatedData['batch_quantity'] ?? null,
@@ -133,7 +170,7 @@ class QualityFormController extends Controller
                 'calibration_equipment' => $validatedData['calibration_equipment'] ?? null,
                 'calibration_equipment_file' => $uploadedFiles['calibration_equipment_file'] ?? null,
                 'electrical_optical_test' => $validatedData['electrical_optical_test'] ?? null,
-                'electrical_optical_test_file' => $uploadedFiles['electrical_optical_test_file'] ?? null,
+                'electrical_optical_test_file' => $validatedData['electrical_optical_test_file'] ?? null,
                 'supplier_measurement' => $validatedData['supplier_measurement'] ?? null,
                 'supplier_measurement_file' => $uploadedFiles['supplier_measurement_file'] ?? null,
                 'environmental_conditions' => $validatedData['environmental_conditions'] ?? null,
@@ -190,18 +227,18 @@ class QualityFormController extends Controller
                 'technician_id' => 2,
                 'assigned_to' => 'cagatay.cakir',
                 'status' => 'pending',
-                'surec_id' => $newSurecId
+                'surec_id' => $formattedSurecId,
+                'inventory_data' => json_encode($validatedData['inventory_data'] ?? []),
+                'measurement_data' => json_encode($validatedData['measurement_data'] ?? []),
+
             ]);
-           // dd($newForm);
-            
-    
-            return redirect()->route('dashboard')->with('success', 'Form başarıyla oluşturuldu! with surec id ' . $newSurecId);
+            //dd($request->all());
+
+            return redirect()->route('dashboard')->with('success', 'Form başarıyla oluşturuldu! Süreç ID: ' . $formattedSurecId);
         } catch (\Exception $e) {
             return back()->withErrors(['error' => $e->getMessage()]);
         }
     }
-    
-    
 
     // Edit fonksiyonu
     public function edit($id)
@@ -209,6 +246,12 @@ class QualityFormController extends Controller
         $form = QualityForm::findOrFail($id);
         $disabled = false; // Düzenleme yapılabilir
         return view('quality_forms.edit', compact('form', 'disabled'));
+    }
+    public function edit_technician($id)
+    {
+        $form = QualityForm::findOrFail($id);
+        $disabled = false; // Düzenleme yapılabilir
+        return view('quality_forms.edit_technician', compact('form', 'disabled'));
     }
 
     // bu sadece readonly göstermek için
@@ -379,6 +422,164 @@ class QualityFormController extends Controller
             return back()->withErrors(['error' => $e->getMessage()]);
         }
     }
+    public function update_technician(Request $request, $id)
+    {
+        try {
+            // Validate incoming request data
+            $validatedData = $request->validate([
+                'document_date' => 'required|date',
+                'part_stock_number' => 'required|string|max:255',
+                'quality_report_number' => 'required|string|max:255',
+                'part_description' => 'nullable|string',
+                'product_revision' => 'nullable|string',
+                'batch_quantity' => 'required|integer',
+                'inspected_quantity' => 'required|integer',
+                'technical_drawing_qdms' => 'nullable|string',
+                'mechanical_measurements' => 'nullable|string',
+                'calibration_equipment' => 'nullable|string',
+                'electrical_optical_test' => 'nullable|string',
+                'supplier_measurement' => 'nullable|string',
+                'environmental_conditions' => 'nullable|string',
+                'special_process_tests' => 'nullable|string',
+                'quality_conformance_certificate' => 'nullable|string',
+                'shipping_packaging' => 'nullable|string',
+                'counterfeit_suspected' => 'nullable|string',
+                'shelf_life' => 'nullable|string',
+                'product_type' => 'nullable|array',
+                'mechanical_raw_material' => 'nullable|string',
+                'mechanical_paint' => 'nullable|string',
+                'mechanical_exterior' => 'nullable|string',
+                'mechanical_welding_documents' => 'nullable|string',
+                'electronics_shipping' => 'nullable|string',
+                'electronics_pcb_certificate' => 'nullable|string',
+                'electronics_special_process' => 'nullable|string',
+                'electronics_pcb_mechanical' => 'nullable|string',
+                'electronics_visual_inspection' => 'nullable|string',
+                'electronics_electrical_test' => 'nullable|string',
+                'component_shipping' => 'nullable|string',
+                'component_lot_certificate' => 'nullable|string',
+                'component_visual_inspection' => 'nullable|string',
+                'component_electrical_test' => 'nullable|string',
+                'component_measurement' => 'nullable|string',
+                'cabling_mechanical_test' => 'nullable|string',
+                'cabling_visual_inspection' => 'nullable|string',
+                'cabling_electrical_test' => 'nullable|string',
+                'suspected_supplier_list' => 'nullable|string',
+                'suspected_traceability' => 'nullable|string',
+                'suspected_fake_packaging' => 'nullable|string',
+                'inspected_by' => 'required|string|max:255',
+                'approved_by' => 'required|string|max:255',
+            ]);
+    
+            $form = QualityForm::findOrFail($id);
+    
+            // Dosya yükleme işlemleri
+            $fileFields = [
+                'technical_drawing_qdms_file' => 'technical_drawing_qdms_file',
+                'mechanical_measurements_file' => 'mechanical_measurements_file',
+                'calibration_equipment_file' => 'calibration_equipment_file',
+                'electrical_optical_test_file' => 'electrical_optical_test_file',
+                'supplier_measurement_file' => 'supplier_measurement_file',
+                'environmental_conditions_file' => 'environmental_conditions_file',
+                'special_process_tests_file' => 'special_process_tests_file',
+                'quality_conformance_certificate_file' => 'quality_conformance_certificate_file',
+                'shipping_packaging_file' => 'shipping_packaging_file',
+                'counterfeit_suspected_file' => 'counterfeit_suspected_file',
+                'shelf_life_file' => 'shelf_life_file',
+                'mechanical_raw_material_file' => 'mechanical_raw_material_file',
+                'mechanical_paint_file' => 'mechanical_paint_file',
+                'mechanical_exterior_file' => 'mechanical_exterior_file',
+                'mechanical_welding_documents_file' => 'mechanical_welding_documents_file',
+                'electronics_shipping_file' => 'electronics_shipping_file',
+                'electronics_pcb_certificate_file' => 'electronics_pcb_certificate_file',
+                'electronics_special_process_file' => 'electronics_special_process_file',
+                'component_shipping_file' => 'component_shipping_file',
+                'component_lot_certificate_file' => 'component_lot_certificate_file',
+                'component_visual_inspection_file' => 'component_visual_inspection_file',
+                'component_electrical_test_file' => 'component_electrical_test_file',
+                'component_measurement_file' => 'component_measurement_file',
+                'cabling_mechanical_test_file' => 'cabling_mechanical_test_file',
+                'cabling_visual_inspection_file' => 'cabling_visual_inspection_file',
+                'cabling_electrical_test_file' => 'cabling_electrical_test_file',
+                'suspected_supplier_list_file' => 'suspected_supplier_list_file',
+                'suspected_traceability_file' => 'suspected_traceability_file',
+                'suspected_fake_packaging_file' => 'suspected_fake_packaging_file',
+            ];
+    
+            $uploadedFiles = [];
+    
+            foreach ($fileFields as $field => $inputName) {
+                if ($request->hasFile($inputName)) {
+                    if ($form->$field && Storage::disk('public')->exists($form->$field)) {
+                        Storage::disk('public')->delete($form->$field);
+                    }
+                    $uploadedFiles[$field] = $request->file($inputName)->store('files', 'public');
+                } else {
+                    $uploadedFiles[$field] = $form->$field;
+                }
+            }
+    
+            // Kullanıcı rolüne göre statü ve mesaj ayarlama
+            $role = session('role');
+            $status = $form->status;
+            $successMessage = '';
+    
+            if ($role === 'tekniker') {
+                // Tekniker tarafından güncelleniyorsa, mühendise gönderildi
+                $status = 'sent to engineer again';
+                $successMessage = 'Form başarıyla tekrar mühendise gönderildi.';
+            } elseif ($role === 'mühendis') {
+                // Mühendis tarafından finalize ediliyorsa, tamamlandı
+                $status = 'finished';
+                $successMessage = 'Form başarıyla tamamlandı.';
+            }
+    
+            // Form verilerini güncelle
+            $form->update([
+                'document_date' => $validatedData['document_date'],
+                'part_stock_number' => $validatedData['part_stock_number'],
+                'quality_report_number' => $validatedData['quality_report_number'],
+                'part_description' => $validatedData['part_description'] ?? null,
+                'technical_drawing_qdms_file' => $uploadedFiles['technical_drawing_qdms_file'] ?? $form->technical_drawing_qdms_file,
+                'mechanical_measurements_file' => $uploadedFiles['mechanical_measurements_file'] ?? $form->mechanical_measurements_file,
+                'calibration_equipment_file' => $uploadedFiles['calibration_equipment_file'] ?? $form->calibration_equipment_file,
+                'electrical_optical_test_file' => $uploadedFiles['electrical_optical_test_file'] ?? $form->electrical_optical_test_file,
+                'supplier_measurement_file' => $uploadedFiles['supplier_measurement_file'] ?? $form->supplier_measurement_file,
+                'environmental_conditions_file' => $uploadedFiles['environmental_conditions_file'] ?? $form->environmental_conditions_file,
+                'special_process_tests_file' => $uploadedFiles['special_process_tests_file'] ?? $form->special_process_tests_file,
+                'quality_conformance_certificate_file' => $uploadedFiles['quality_conformance_certificate_file'] ?? $form->quality_conformance_certificate_file,
+                'shipping_packaging_file' => $uploadedFiles['shipping_packaging_file'] ?? $form->shipping_packaging_file,
+                'counterfeit_suspected_file' => $uploadedFiles['counterfeit_suspected_file'] ?? $form->counterfeit_suspected_file,
+                'shelf_life_file' => $uploadedFiles['shelf_life_file'] ?? $form->shelf_life_file,
+                'product_type' => isset($validatedData['product_type']) ? json_encode($validatedData['product_type']) : $form->product_type,
+                'mechanical_raw_material_file' => $uploadedFiles['mechanical_raw_material_file'] ?? $form->mechanical_raw_material_file,
+                'mechanical_paint_file' => $uploadedFiles['mechanical_paint_file'] ?? $form->mechanical_paint_file,
+                'mechanical_exterior_file' => $uploadedFiles['mechanical_exterior_file'] ?? $form->mechanical_exterior_file,
+                'mechanical_welding_documents_file' => $uploadedFiles['mechanical_welding_documents_file'] ?? $form->mechanical_welding_documents_file,
+                'electronics_shipping_file' => $uploadedFiles['electronics_shipping_file'] ?? $form->electronics_shipping_file,
+                'electronics_pcb_certificate_file' => $uploadedFiles['electronics_pcb_certificate_file'] ?? $form->electronics_pcb_certificate_file,
+                'electronics_special_process_file' => $uploadedFiles['electronics_special_process_file'] ?? $form->electronics_special_process_file,
+                'component_shipping_file' => $uploadedFiles['component_shipping_file'] ?? $form->component_shipping_file,
+                'component_lot_certificate_file' => $uploadedFiles['component_lot_certificate_file'] ?? $form->component_lot_certificate_file,
+                'component_visual_inspection_file' => $uploadedFiles['component_visual_inspection_file'] ?? $form->component_visual_inspection_file,
+                'component_electrical_test_file' => $uploadedFiles['component_electrical_test_file'] ?? $form->component_electrical_test_file,
+                'component_measurement_file' => $uploadedFiles['component_measurement_file'] ?? $form->component_measurement_file,
+                'cabling_mechanical_test_file' => $uploadedFiles['cabling_mechanical_test_file'] ?? $form->cabling_mechanical_test_file,
+                'cabling_visual_inspection_file' => $uploadedFiles['cabling_visual_inspection_file'] ?? $form->cabling_visual_inspection_file,
+                'cabling_electrical_test_file' => $uploadedFiles['cabling_electrical_test_file'] ?? $form->cabling_electrical_test_file,
+                'suspected_supplier_list_file' => $uploadedFiles['suspected_supplier_list_file'] ?? $form->suspected_supplier_list_file,
+                'suspected_traceability_file' => $uploadedFiles['suspected_traceability_file'] ?? $form->suspected_traceability_file,
+                'suspected_fake_packaging_file' => $uploadedFiles['suspected_fake_packaging_file'] ?? $form->suspected_fake_packaging_file,
+                'inspected_by' => $validatedData['inspected_by'],
+                'approved_by' => $validatedData['approved_by'],
+                'status' => 'pending',
+            ]);
+    
+            return redirect()->route('form.edit', $form->id)->with('success', $successMessage);
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => $e->getMessage()]);
+        }
+    }
     
     
     
@@ -421,8 +622,9 @@ class QualityFormController extends Controller
         }
 
         $forms = QualityForm::where('assigned_to', $username)
-                    ->where('status', 'pending')
-                    ->get();
+        ->whereIn('status', ['pending', 'sent to engineer again'])
+        ->get();
+
 
 
         return view('quality_forms.assigned', ['forms' => $forms]);

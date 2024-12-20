@@ -17,6 +17,10 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> 
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://unpkg.com/html2pdf.js@0.9.2/dist/html2pdf.bundle.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 
     <style>
         body {
@@ -271,6 +275,46 @@
         .profile-dropdown:hover .dropdown-content {
             display: block;
         }
+        @media print {
+            body * {
+                visibility: hidden; /* Tüm sayfayı gizle */
+            }
+            #form, #form * {
+                visibility: visible; /* Sadece formu görünür yap */
+            }
+            #form {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+            }
+        }
+        select {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        #suggestions {
+            background-color: white;
+            border: 1px solid #ccc;
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            position: absolute;
+            z-index: 1000;
+            width: 100%;
+        }
+        
+        #suggestions .list-group-item {
+            cursor: pointer;
+            padding: 8px;
+        }
+        
+        #suggestions .list-group-item:hover {
+            background-color: #f1f1f1;
+        }
+        
+
+        
     </style>
 </head>
 <body>
@@ -279,7 +323,7 @@
     <div class="header">
         <h1 class="title-center">ASPİLSAN Kalite Portalı</h1>
         <div class="user-menu">
-            <span class="welcome-text">Welcome, {{ session('username') }}!</span>
+            <span class="welcome-text">Hoşgeldiniz, {{ session('username') }}!</span>
             
             <div class="profile-dropdown">
                 <img src="{{ asset('images/default-avatar.png') }}" alt="User Avatar" class="user-avatar">

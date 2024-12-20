@@ -30,7 +30,7 @@
                             <td>{{ $form->batch_quantity }}</td>
                             <td class="text-center">
                                 <!-- Düzenle Butonu -->
-                                <a href="{{ route('form.edit', $form->id) }}" class="btn btn-primary btn-sm mx-1 animate-btn">
+                                <a href="{{ route('form.edit_technician', $form->id) }}" class="btn btn-primary btn-sm mx-1 animate-btn">
                                     <i class="fas fa-pencil-alt"></i> Düzenle
                                 </a>
 

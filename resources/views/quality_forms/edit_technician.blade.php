@@ -2,27 +2,7 @@
 
 @section('content')
 <div class="container">
-    <head>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.4.0/purify.min.js"></script>
-        <script src="https://unpkg.com/html2pdf.js@0.9.2/dist/html2pdf.bundle.js"></script>
-        <script src="https://unpkg.com/html2pdf.js@0.9.2/dist/html2pdf.bundle.js"></script>
-
-
-
-    </head>
-
-   
-    <h2 style="text-align: center; position: relative; display: inline-block; margin-bottom: 10px; padding-bottom: 20px;">
-        TKKF/ FR-KYM-247 Formu Düzenle
-        <span style="position: absolute; bottom: -5px; left: 0; right: 0; width: 100%; height: 1px; background-color: black;"></span>
-    </h2>
-    
-    <!-- Butonun inline stilinde soldan boşluk veriyoruz -->
-    <button id="download-pdf" style="margin-left: 20px;">
-        <i class="fas fa-print"></i> PDF Olarak İndir
-    </button>
-    
+    <h2>TKKF/ FR-KYM-247 Formu Düzenle</h2>
 
     @if (session('success'))
         <div class="alert alert-success">
@@ -41,13 +21,7 @@
         </div>
     @endif
     
-    <form id="form" action="{{ route('form.update', $form->id) }}" method="POST" enctype="multipart/form-data" style="pointer-events: none;">
-        <div class="row mb-3">
-            <div class="col-md-6">
-                <label for="surec_id" class="form-label">FORM ID</label>
-                <input type="text" class="form-control" id="surec_id" name="surec_id" value="{{ $form->surec_id }}" readonly>
-            </div>
-        </div>
+    <form id="form" action="{{ route('form.update_technician', $form->id) }}" method="POST" enctype="multipart/form-data">
         @csrf
         @method('PUT') <!-- Form güncellemesi için -->
 
@@ -71,7 +45,7 @@
             </div>
             <div class="col-md-6">
                 <label for="quality_report_number" class="form-label">Tedarik Kalite Kontrol Rapor Numarası</label>
-                <input type="text" class="form-control" id="quality_report_number" name="quality_report_number" value="{{ $form->quality_report_number }}" readonly required >
+                <input type="text" class="form-control" id="quality_report_number" name="quality_report_number" value="{{ $form->quality_report_number }}" required    @if($disabled) disabled @endif>
             </div>
         </div>
 
@@ -96,14 +70,6 @@
                 <input type="number" class="form-control" id="inspected_quantity" name="inspected_quantity" value="{{ $form->inspected_quantity }}" required    @if($disabled) disabled @endif>
             </div>
         </div>
-
-        <!-- Modal Çağırma Butonu -->
-        <div class="mb-3">
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#dynamicFormModal" pointer-events: auto; style="pointer-events: auto;">
-                Envanter ve Kalibrasyon Bilgilerini Görüntüle
-            </button>
-        </div>
-        @include('components.get_inventory_data')
 
         <!-- Genel Sorular -->
         <div class="mb-3">
@@ -595,48 +561,28 @@
        
 
         <!-- Onay Bölümü -->
-    
         <div class="row mt-5">
             <div class="col-md-6">
-            <label for="inspected_by" class="form-label">Kontrol Eden (Inspected By)</label>
-            <input type="text" class="form-control" id="inspected_by" name="inspected_by"
-                value="{{ $form ? $form->inspected_by : '' }}" >
+                <label for="inspected_by" class="form-label">Kontrol Eden (Inspected By)</label>
+                <input type="text" class="form-control" id="inspected_by" name="inspected_by" value="{{ $form->inspected_by }}"  @if($disabled) disabled @endif> 
             </div>
-            
-            <!-- Onaylayan (Approved By) Alanı -->
             <div class="col-md-6">
                 <label for="approved_by" class="form-label">Onaylayan (Approved By)</label>
-                <input type="text" class="form-control" id="approved_by" name="approved_by"
-                       value="{{ session('role') === 'mühendis' ? session('name') : '' }}" readonly>
+                <input type="text" class="form-control" id="approved_by" name="approved_by" value="{{ $form->approved_by }}"  @if($disabled) disabled @endif> 
             </div>
         </div>
-    
-    <div style="display: flex; justify-content: space-between; gap: 10px;">
-    <!-- Submit Button -->
-    <button type="button" class="btn btn-primary mt-4" id="submitBtn" @if($disabled) disabled @endif
-        style="display: flex; align-items: center; justify-content: center; padding-left: 15px; padding-right: 15px; pointer-events: auto; ">
-        <i class="fas fa-check" style="margin-right: 8px; font-size: 16px; "></i> Onayla
-    </button>
 
+   <!-- Submit Button -->
+    <button type="button" class="btn btn-primary mt-4" id="submitBtn" @if($disabled) disabled @endif>Onayla</button>
     
         
     </form>
-
-   <form id="rejectForm" action="{{ route('form.reject', $form->id) }}" method="POST">
-        @csrf
-        @method('POST') <!-- Reddetme işlemi için de PUT kullanıyoruz -->
-        <button type="button" class="btn btn-danger mt-4" id="rejectBtn" @if($disabled) disabled @endif
-            style="display: flex; align-items: center; justify-content: center; padding-left: 15px; padding-right: 15px; pointer-events: auto; ">
-            <i class="fas fa-times" style="margin-right: 8px; font-size: 16px; pointer-events: auto;"></i> Reddet
-        </button>
-    </form>
-    </div>
-
+    <form id="rejectForm" action="{{ route('form.reject', $form->id) }}" method="POST">
+    @csrf
+    @method('POST') <!-- Reddetme işlemi için de PUT kullanıyoruz -->
+  
+</form>
 </div>
-
-
-
-
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
@@ -730,7 +676,7 @@
     document.getElementById('submitBtn').addEventListener('click', function(e) {
         // SweetAlert onay penceresi
         Swal.fire({
-            title: 'Bu form onayınızın ardından başarıyla sonlandırılacaktır.',
+            title: 'Bu form onayınızın ardından tekrar mühendise yönlendirilecektir.',
             text: "Onaylıyor musunuz?",
             icon: 'warning',
             showCancelButton: true,
@@ -747,32 +693,7 @@
         })
     });
 
-    document.getElementById('rejectBtn').addEventListener('click', function(e) {
-        // SweetAlert reddetme penceresi
-        Swal.fire({
-            title: 'Bu formu reddetmek üzeresiniz.',
-            text: "Reddetmek istediğinize emin misiniz?",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Evet, Reddet',
-            cancelButtonText: 'Hayır, İptal'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // Reddetme formunu gönder
-                document.getElementById('rejectForm').submit();
-            }
-        });
-    });
-</script>
-
-<script src="https://unpkg.com/html2pdf.js@0.9.2/dist/html2pdf.bundle.js"></script>
-<script>
-    document.getElementById("download-pdf").addEventListener("click", function () {
-        // Yazdırma penceresini aç
-        window.print();
-    });
+   
 </script>
 
 @endsection

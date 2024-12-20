@@ -1,27 +1,26 @@
 <?php
-
 namespace App\Providers;
 
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
-use App\Models\QualityForm; // QualityForm modelini ekle
-use App\Observers\QualityFormObserver; // QualityFormObserver observer'ını ekle
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
-    public function register(): void
+    public function boot()
     {
-        //
+        // MSSQL bağlantısından stok verilerini doğrudan çekiyoruz
+        $stoklar = DB::connection('external')
+                     ->table('TBLSTSABIT')
+                     ->select('stok_kodu', 'stok_adi')
+                     ->get();
+
+        // Tüm view'lere stok bilgilerini paylaş
+        View::share('stoklar', $stoklar);
     }
 
-    /**
-     * Bootstrap any application services.
-     */
-    public function boot(): void
+    public function register()
     {
-        // QualityForm modeline observer'ı bağla
-        QualityForm::observe(QualityFormObserver::class);
+        //
     }
 }

@@ -41,7 +41,7 @@
                                     <i class="fas fa-pencil-alt"></i>
                                 </a>
 
-                                @if ($form->status === 'pending')
+                                @if ($form->status === 'pending' || $form->status === 'sent to engineer again')
                                     <!-- Onay Butonu -->
                                     {{--  <form action="{{ route('form.approve', $form->id) }}" method="POST" style="display:inline-block;">
                                         @csrf

@@ -4,7 +4,7 @@
     <div class="row mb-3">
         <div class="col-md-6">
             <label for="surec_id" class="form-label">FORM ID</label>
-            <input type="text" class="form-control" id="surec_id" name="surec_id" value="{{ $newSurecId }}" readonly>
+            <input type="text" class="form-control" id="surec_id" name="surec_id" value="{{ $formattedSurecId }}" readonly>
         </div>
     </div>
     <h2 class="form-title">TKKF/ FR-KYM-247 Form</h2>
@@ -45,21 +45,24 @@
         </div>
 
         <!-- Parça Bilgileri -->
+        <!-- Parça Bilgileri -->
         <div class="row mb-3">
             <div class="col-md-6">
                 <label for="part_stock_number" class="form-label">Parça Stok Numarası</label>
-                <input type="text" class="form-control" id="part_stock_number" name="part_stock_number" required>
+                <input type="text" class="form-control" id="part_stock_number" name="part_stock_number" placeholder="Stok Kodu veya Adı Girin..." autocomplete="off">
+                <ul class="list-group" id="suggestions" style="position: absolute; z-index: 1000; max-height: 200px; overflow-y: auto;"></ul>
             </div>
+            
             <div class="col-md-6">
                 <label for="quality_report_number" class="form-label">Tedarik Kalite Kontrol Rapor Numarası</label>
-                <input type="text" class="form-control" id="quality_report_number" name="quality_report_number" required>
+                <input type="text" class="form-control" id="quality_report_number" name="quality_report_number" value="{{ $newQualityReportNumber ?? '' }}" readonly required>
             </div>
         </div>
 
         <div class="row mb-3">
             <div class="col-md-6">
                 <label for="part_description" class="form-label">Parça Stok Tanımı</label>
-                <input type="text" class="form-control" id="part_description" name="part_description" required>
+                <input type="text" class="form-control" id="part_description" name="part_description" readonly required>
             </div>
             <div class="col-md-6">
                 <label for="product_revision" class="form-label">Kontrol Edilen Ürün Revizyonu</label>
@@ -76,14 +79,26 @@
                 <label for="inspected_quantity" class="form-label">Kontrol Edilen Parça Miktarı</label>
                 <input type="number" class="form-control" id="inspected_quantity" name="inspected_quantity" required>
             </div>
+
+       
         </div>
+
+        <!-- Modal Çağırma Butonu -->
+        <div class="mb-3">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#dynamicFormModal">
+                Envanter ve Kalibrasyon Ekle
+            </button>
+        </div>
+        @include('components.inventory-modal')
+       
+
 
         <!-- Genel Bölüm -->
         <h4>Genel</h4>
 
         <!-- Genel Sorular -->
         <div class="mb-3">
-            <label>Teknik Resim QDMS'te var mı?</label>
+            <label>Teknik Resim QDMS te var mı?</label>
             <div>
                 <input type="radio" name="technical_drawing_qdms" value="evet" id="qdms_evet"> Evet
                 <input type="radio" name="technical_drawing_qdms" value="hayır" id="qdms_hayir"> Hayır
@@ -454,13 +469,18 @@
 
         <!-- Onay Bölümü -->
         <div class="row mt-5">
+            <!-- Kontrol Eden (Inspected By) Alanı -->
             <div class="col-md-6">
                 <label for="inspected_by" class="form-label">Kontrol Eden (Inspected By)</label>
-                <input type="text" class="form-control" id="inspected_by" name="inspected_by" required>
+                <input type="text" class="form-control" id="inspected_by" name="inspected_by"
+                       value="{{ session('role') === 'tekniker' ? session('name') : '' }}" readonly>
             </div>
+            
+            <!-- Onaylayan (Approved By) Alanı -->
             <div class="col-md-6">
                 <label for="approved_by" class="form-label">Onaylayan (Approved By)</label>
-                <input type="text" class="form-control" id="approved_by" name="approved_by" required>
+                <input type="text" class="form-control" id="approved_by" name="approved_by"
+                       value="{{ session('role') === 'mühendis' ? session('name') : '' }}" readonly>
             </div>
         </div>
 
@@ -503,6 +523,18 @@
         })
     });
     document.addEventListener('DOMContentLoaded', function () {
+        const partStockNumber = document.getElementById('part_stock_number');
+        const partDescription = document.getElementById('part_description');
+
+        partStockNumber.addEventListener('change', function () {
+            const selectedOption = this.options[this.selectedIndex];
+            const description = selectedOption.getAttribute('data-description');
+
+            // Parça Stok Tanımını dolduruyoruz
+            partDescription.value = description || '';
+        });
+
+
         // Mevcut tarihi al
         var today = new Date();
         var day = ("0" + today.getDate()).slice(-2); // Gün'ü iki haneli yap
@@ -515,9 +547,55 @@
         // document_date input'una güncel tarihi ata
         document.getElementById('document_date').value = currentDate;
     });
-
-
 </script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const inputField = document.getElementById('part_stock_number');
+        const suggestionBox = document.getElementById('suggestions');
+        const descriptionField = document.getElementById('part_description'); // Stok adı için alan
+
+        inputField.addEventListener('input', function () {
+            const query = inputField.value;
+
+            if (query.length > 2) { // En az 3 karakterden sonra arama yap
+                fetch(`/autocomplete-stocks?query=${query}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        suggestionBox.innerHTML = ''; // Önce listeyi temizle
+
+                        data.forEach(item => {
+                            const li = document.createElement('li');
+                            li.classList.add('list-group-item');
+                            li.textContent = `${item.stok_kodu} - ${item.stok_adi}`;
+                            li.setAttribute('data-kodu', item.stok_kodu);
+                            li.setAttribute('data-adi', item.stok_adi);
+
+                            // Tıklanınca stok kodu ve stok adını doldur
+                            li.addEventListener('click', function () {
+                                inputField.value = this.getAttribute('data-kodu'); // Stok kodunu doldur
+                                descriptionField.value = this.getAttribute('data-adi'); // Stok adını doldur
+                                suggestionBox.innerHTML = ''; // Listeyi temizle
+                            });
+
+                            suggestionBox.appendChild(li);
+                        });
+                    });
+            } else {
+                suggestionBox.innerHTML = ''; // Eğer karakter azsa önerileri temizle
+            }
+        });
+
+        // Input alanı dışında bir yere tıklanınca öneri listesini gizle
+        document.addEventListener('click', function (event) {
+            if (!inputField.contains(event.target) && !suggestionBox.contains(event.target)) {
+                suggestionBox.innerHTML = '';
+            }
+        });
+    });
+</script>
+
+
+
 
 
 @endsection

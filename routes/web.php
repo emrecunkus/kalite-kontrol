@@ -3,6 +3,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Log; // Log sınıfını ekleyelim
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\QualityFormController;
+use Illuminate\Support\Facades\DB;
 
 // Root rotası, ana sayfaya gidildiğinde login sayfasına yönlendirir
 Route::get('/', function () {
@@ -38,6 +39,7 @@ Route::post('/reject/{id}', [QualityFormController::class, 'reject'])->name('for
 
 // Formu düzenleme sayfası için rota
 Route::get('/forms/{id}/edit', [QualityFormController::class, 'edit'])->name('form.edit');
+Route::get('/forms/{id}/edit_technician', [QualityFormController::class, 'edit_technician'])->name('form.edit_technician');
 
 //readonly görmek için rota;
 Route::get('/forms/{id}/showReadOnly', [QualityFormController::class, 'showReadOnly'])->name('form.showReadOnly');
@@ -50,6 +52,10 @@ Route::get('/technician/submitted-forms', [QualityFormController::class, 'submit
 
 Route::get('/rejected-forms', [QualityFormController::class, 'rejectedForms'])->name('rejected.forms');
 
+Route::get('/inventory-modal', function () {
+    return view('components.inventory-modal'); // Blade dosyasının tam yolunu yazın
+}); // test
+
 
 Route::get('/profile', function () {
     $username = auth()->user()->username ?? 'Misafir';  // Kullanıcı adı
@@ -61,5 +67,19 @@ Route::get('/profile', function () {
 
 Route::delete('/form/delete/{id}', [QualityFormController::class, 'delete'])->name('form.delete');
 Route::get('/technician/rejected-forms', [QualityFormController::class, 'rejectedForms'])->name('technician.rejected_forms');
+
+Route::get('/autocomplete-stocks', function () {
+    $search = request()->get('query');
+
+    $results = DB::connection('external')
+        ->table('TBLSTSABIT')
+        ->where('stok_kodu', 'LIKE', "%{$search}%")
+        ->orWhere('stok_adi', 'LIKE', "%{$search}%")
+        ->select('stok_kodu', 'stok_adi')
+        ->limit(10)
+        ->get();
+
+    return response()->json($results);
+});
 
 
