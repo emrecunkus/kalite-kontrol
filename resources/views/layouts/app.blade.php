@@ -14,8 +14,10 @@
     <!-- FontAwesome for Icons -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> 
 
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> 
+    <script src="{{ asset('js/app.js') }}" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://unpkg.com/html2pdf.js@0.9.2/dist/html2pdf.bundle.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js"></script>
@@ -312,12 +314,27 @@
         #suggestions .list-group-item:hover {
             background-color: #f1f1f1;
         }
+        .file-uploaded {
+            background-color: #d4edda !important; /* Açık yeşil */
+            border-color: #c3e6cb !important;
+        }
+        
+        input[type="file"].upload-field {
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+        
+        input[type="file"].upload-field:hover {
+            background-color: #e9ecef; /* Hafif gri */
+            border-color: #adb5bd;
+        }
+        
         
 
         
     </style>
 </head>
 <body>
+   
 
     <!-- Header -->
     <div class="header">
@@ -346,7 +363,7 @@
         </button>
     
         <div class="menu">
-            @if(session('role') == 'mühendis')
+            @if(session('role') == 'mühendis' && session('name') != 'cagatay.cakir')
                 <a href="{{ route('mühendis.assigned') }}"><i class="fas fa-tasks"></i> Onayda Bekleyen Formlar</a>
                 <a href="{{ route('mühendis.report') }}"><i class="fas fa-file-contract"></i>Onaylanmış Formlar</a>
                 <a href="{{ route('mühendis.tum_report') }}"><i class="fas fa-file-contract"></i>Tüm Formlar</a>
@@ -354,7 +371,17 @@
                 <a href="{{ route('tekniker.form') }}"><i class="fas fa-pencil-alt"></i> Form Oluştur</a>
                 <a href="{{ route('rejected.forms') }}"><i class="fas fa-ban"></i> Reddedilen Formlar</a>
                 <a href="{{ route('technician.submitted.forms') }}"><i class="fas fa-clock"></i> Gönderilen Formlar</a>
+            @elseif(session('name') == 'cagatay.cakir')
+                <a href="{{ route('tekniker.form') }}"><i class="fas fa-pencil-alt"></i> Form Oluştur</a>
+                <a href="{{ route('rejected.forms') }}"><i class="fas fa-ban"></i> Reddedilen Formlar</a>
+                <a href="{{ route('technician.submitted.forms') }}"><i class="fas fa-clock"></i> Gönderilen Formlar</a>
+                <a href="{{ route('mühendis.assigned') }}"><i class="fas fa-tasks"></i> Onayda Bekleyen Formlar</a>
+                <a href="{{ route('mühendis.report') }}"><i class="fas fa-file-contract"></i>Onaylanmış Formlar</a>
+                <a href="{{ route('mühendis.tum_report') }}"><i class="fas fa-file-contract"></i>Tüm Formlar</a>
             @endif
+
+           
+          
             <a href="{{ route('profile') }}"><i class="fas fa-user"></i> Profil</a>
             <a href="#"><i class="fas fa-cog"></i> Ayarlar</a>
             <a href="{{ route('logout') }}"
@@ -400,6 +427,26 @@
             sidebar.classList.toggle('collapsed');
             content.classList.toggle('collapsed');
         });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+        const fileInputs = document.querySelectorAll('.upload-field'); // Tüm dosya yükleme alanlarını seç
+
+        fileInputs.forEach(fileInput => {
+            fileInput.addEventListener('change', function () {
+                if (this.files.length > 0) {
+                    this.classList.add('file-uploaded');
+                    console.log("dosya yüklendi");
+                } else {
+                    this.classList.remove('file-uploaded');
+                    console.log("dosya yüklenemedi");
+                }
+            });
+        });
+        });
+
+
+
     </script>
 
 </body>

@@ -7,6 +7,12 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.4.0/purify.min.js"></script>
         <script src="https://unpkg.com/html2pdf.js@0.9.2/dist/html2pdf.bundle.js"></script>
         <script src="https://unpkg.com/html2pdf.js@0.9.2/dist/html2pdf.bundle.js"></script>
+        <style>
+            .clickable {
+                pointer-events: auto;
+            }
+            
+        </style>
 
 
 
@@ -105,6 +111,45 @@
         </div>
         @include('components.get_inventory_data')
 
+        <div class="modal fade" id="dynamicFormModal" tabindex="-1" aria-labelledby="dynamicFormModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="dynamicFormModalLabel">Envanter ve Kalibrasyon Bilgileri</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Modal İçeriği -->
+                        <h6>Envanter ve Kalibrasyon Bilgileri</h6>
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Envanter No</th>
+                                    <th>Kalibrasyon No</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inventoryTableBody">
+                                <tr>
+                                    <td>1</td>
+                                    <td>ENV001</td>
+                                    <td>CAL001</td>
+                                </tr>
+                                <tr>
+                                    <td>2</td>
+                                    <td>ENV002</td>
+                                    <td>CAL002</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Geçici Yazdırma Alanı -->
+        <div id="printArea" style="display: none;"></div>
+
         <!-- Genel Sorular -->
         <div class="mb-3">
             <label>Teknik Resim QDMS'te var mı?</label>
@@ -126,7 +171,7 @@
             </div>
         
             @if ($form->technical_drawing_qdms_file)
-                <a href="{{ asset('storage/' . $form->technical_drawing_qdms_file) }}" target="_blank">Dosyayı Görüntüle</a>
+                <a href="{{ asset('storage/' . $form->technical_drawing_qdms_file) }}" target="_blank" class="clickable" >Dosyayı Görüntüle </a>
             @endif
         </div>
         
@@ -151,7 +196,7 @@
         </div>
         
         @if ($form->mechanical_measurements_file)
-            <a href="{{ asset('storage/' . $form->mechanical_measurements_file) }}" target="_blank">Dosyayı Görüntüle</a>
+            <a href="{{ asset('storage/' . $form->mechanical_measurements_file) }}" target="_blank " class="clickable">Dosyayı Görüntüle</a>
         @endif
         </div>
 
@@ -176,7 +221,7 @@
             </div>
             
             @if ($form->calibration_equipment_file)
-                <a href="{{ asset('storage/' . $form->calibration_equipment_file) }}" target="_blank">Dosyayı Görüntüle</a>
+                <a href="{{ asset('storage/' . $form->calibration_equipment_file) }}" target="_blank" class="clickable">Dosyayı Görüntüle</a>
             @endif
         </div>
 
@@ -201,7 +246,7 @@
             </div>
 
             @if ($form->electrical_optical_test_file)
-                <a href="{{ asset('storage/' . $form->electrical_optical_test_file) }}" target="_blank">Dosyayı Görüntüle</a>
+                <a href="{{ asset('storage/' . $form->electrical_optical_test_file) }}" target="_blank" class="clickable">Dosyayı Görüntüle</a>
             @endif
         </div>
 
@@ -226,7 +271,7 @@
             </div>
 
             @if ($form->supplier_measurement_file)
-                <a href="{{ asset('storage/' . $form->supplier_measurement_file) }}" target="_blank">Dosyayı Görüntüle</a>
+                <a href="{{ asset('storage/' . $form->supplier_measurement_file) }}" target="_blank" class="clickable" >Dosyayı Görüntüle</a>
             @endif
         </div>
 
@@ -239,7 +284,7 @@
                 <input type="file" class="form-control mt-2" name="environmental_conditions_file" @if($disabled) disabled @endif>
             </div>
             @if ($form->environmental_conditions_file)
-                <a href="{{ asset('storage/' . $form->environmental_conditions_file) }}" target="_blank">Dosyayı Görüntüle</a>
+                <a href="{{ asset('storage/' . $form->environmental_conditions_file) }}" target="_blank" class="clickable">Dosyayı Görüntüle</a>
             @endif
         </div>
 
@@ -252,7 +297,7 @@
                 <input type="file" class="form-control mt-2" name="special_process_tests_file" @if($disabled) disabled @endif>
             </div>
             @if ($form->special_process_tests_file)
-                <a href="{{ asset('storage/' . $form->special_process_tests_file) }}" target="_blank">Dosyayı Görüntüle</a>
+                <a href="{{ asset('storage/' . $form->special_process_tests_file) }}" target="_blank" class="clickable">Dosyayı Görüntüle</a>
             @endif
         </div>
 
@@ -265,7 +310,7 @@
                 <input type="file" class="form-control mt-2" name="quality_conformance_certificate_file" @if($disabled) disabled @endif>
             </div>
             @if ($form->quality_conformance_certificate_file)
-                <a href="{{ asset('storage/' . $form->quality_conformance_certificate_file) }}" target="_blank">Dosyayı Görüntüle</a>
+                <a href="{{ asset('storage/' . $form->quality_conformance_certificate_file) }}" target="_blank" class="clickable">Dosyayı Görüntüle</a>
             @endif
         </div>
 
@@ -278,7 +323,7 @@
                 <input type="file" class="form-control mt-2" name="shipping_packaging_file" @if($disabled) disabled @endif>
             </div>
             @if ($form->shipping_packaging_file)
-                <a href="{{ asset('storage/' . $form->shipping_packaging_file) }}" target="_blank">Dosyayı Görüntüle</a>
+                <a href="{{ asset('storage/' . $form->shipping_packaging_file) }}" target="_blank" class="clickable">Dosyayı Görüntüle</a>
             @endif
         </div>
 
@@ -291,7 +336,7 @@
                 <input type="file" class="form-control mt-2" name="counterfeit_suspected_file" @if($disabled) disabled @endif>
             </div>
             @if ($form->counterfeit_suspected_file)
-                <a href="{{ asset('storage/' . $form->counterfeit_suspected_file) }}" target="_blank">Dosyayı Görüntüle</a>
+                <a href="{{ asset('storage/' . $form->counterfeit_suspected_file) }}" target="_blank" class="clickable">Dosyayı Görüntüle</a>
             @endif
         </div>
 
@@ -304,7 +349,7 @@
                 <input type="file" class="form-control mt-2" name="shelf_life_file" @if($disabled) disabled @endif>
             </div>
             @if ($form->shelf_life_file)
-                <a href="{{ asset('storage/' . $form->shelf_life_file) }}" target="_blank">Dosyayı Görüntüle</a>
+                <a href="{{ asset('storage/' . $form->shelf_life_file) }}" target="_blank" class="clickable">Dosyayı Görüntüle</a>
             @endif
         </div>
 
@@ -348,7 +393,7 @@
                     <input type="file" class="form-control mt-2" name="mechanical_raw_material_file" @if($disabled) disabled @endif>
                 </div>
                 @if ($form->mechanical_raw_material_file)
-                <a href="{{ asset('storage/' . $form->mechanical_raw_material_file) }}" target="_blank">Dosyayı Görüntüle</a>
+                <a href="{{ asset('storage/' . $form->mechanical_raw_material_file) }}" target="_blank" class="clickable">Dosyayı Görüntüle</a>
                 @endif
             </div>
 
@@ -361,7 +406,7 @@
                     <input type="file" class="form-control mt-2" name="mechanical_paint_file" @if($disabled) disabled @endif>
                 </div>
                 @if ($form->mechanical_paint_file)
-                <a href="{{ asset('storage/' . $form->mechanical_paint_file) }}" target="_blank">Dosyayı Görüntüle</a>
+                <a href="{{ asset('storage/' . $form->mechanical_paint_file) }}" target="_blank" class="clickable">Dosyayı Görüntüle</a>
                 @endif
             </div>
 
@@ -374,7 +419,7 @@
                     <input type="file" class="form-control mt-2" name="mechanical_exterior_file" @if($disabled) disabled @endif>
                 </div>
                 @if ($form->mechanical_exterior_file)
-                <a href="{{ asset('storage/' . $form->mechanical_exterior_file) }}" target="_blank">Dosyayı Görüntüle</a>
+                <a href="{{ asset('storage/' . $form->mechanical_exterior_file) }}" target="_blank" class="clickable">Dosyayı Görüntüle</a>
                 @endif
             </div>
 
@@ -387,7 +432,7 @@
                     <input type="file" class="form-control mt-2" name="mechanical_welding_documents_file" @if($disabled) disabled @endif>
                 </div>
                 @if ($form->mechanical_welding_documents_file)
-                <a href="{{ asset('storage/' . $form->mechanical_welding_documents_file) }}" target="_blank">Dosyayı Görüntüle</a>
+                <a href="{{ asset('storage/' . $form->mechanical_welding_documents_file) }}" target="_blank" class="clickable">Dosyayı Görüntüle</a>
                 @endif
             </div>
         </div>
@@ -405,7 +450,7 @@
                     <input type="file" class="form-control mt-2" name="electronics_shipping_file" @if($disabled) disabled @endif>
                 </div>
                 @if ($form->electronics_shipping_file)
-                <a href="{{ asset('storage/' . $form->electronics_shipping_file) }}" target="_blank">Dosyayı Görüntüle</a>
+                <a href="{{ asset('storage/' . $form->electronics_shipping_file) }}" target="_blank" class="clickable">Dosyayı Görüntüle</a>
                 @endif
             </div>
 
@@ -418,7 +463,7 @@
                     <input type="file" class="form-control mt-2" name="electronics_pcb_certificate_file" @if($disabled) disabled @endif>
                 </div>
                 @if ($form->electronics_pcb_certificate_file)
-                <a href="{{ asset('storage/' . $form->electronics_pcb_certificate_file) }}" target="_blank">Dosyayı Görüntüle</a>
+                <a href="{{ asset('storage/' . $form->electronics_pcb_certificate_file) }}" target="_blank" class="clickable">Dosyayı Görüntüle</a>
                 @endif
             </div>
 
@@ -431,7 +476,7 @@
                     <input type="file" class="form-control mt-2" name="electronics_special_process_file" @if($disabled) disabled @endif>
                 </div>
                 @if ($form->electronics_special_process_file)
-                <a href="{{ asset('storage/' . $form->electronics_special_process_file) }}" target="_blank">Dosyayı Görüntüle</a>
+                <a href="{{ asset('storage/' . $form->electronics_special_process_file) }}" target="_blank" class="clickable">Dosyayı Görüntüle</a>
                 @endif
             </div>
         </div>
@@ -449,7 +494,7 @@
                     <input type="file" class="form-control mt-2" name="component_shipping_file" @if($disabled) disabled @endif>
                 </div>
                 @if ($form->component_shipping_file)
-                <a href="{{ asset('storage/' . $form->component_shipping_file) }}" target="_blank">Dosyayı Görüntüle</a>
+                <a href="{{ asset('storage/' . $form->component_shipping_file) }}" target="_blank" class="clickable">Dosyayı Görüntüle</a>
                 @endif
             </div>
 
@@ -462,7 +507,7 @@
                     <input type="file" class="form-control mt-2" name="component_lot_certificate_file" @if($disabled) disabled @endif>
                 </div>
                 @if ($form->component_lot_certificate_file)
-                <a href="{{ asset('storage/' . $form->component_lot_certificate_file) }}" target="_blank">Dosyayı Görüntüle</a>
+                <a href="{{ asset('storage/' . $form->component_lot_certificate_file) }}" target="_blank" class="clickable">Dosyayı Görüntüle</a>
                 @endif
             </div>
 
@@ -475,7 +520,7 @@
                     <input type="file" class="form-control mt-2" name="component_visual_inspection_file" @if($disabled) disabled @endif>
                 </div>
                 @if ($form->component_visual_inspection_file)
-                <a href="{{ asset('storage/' . $form->component_visual_inspection_file) }}" target="_blank">Dosyayı Görüntüle</a>
+                <a href="{{ asset('storage/' . $form->component_visual_inspection_file) }}" target="_blank" class="clickable">Dosyayı Görüntüle</a>
                 @endif
             </div>
 
@@ -488,7 +533,7 @@
                     <input type="file" class="form-control mt-2" name="component_electrical_test_file" @if($disabled) disabled @endif>
                 </div>
                 @if ($form->component_electrical_test_file)
-                <a href="{{ asset('storage/' . $form->component_electrical_test_file) }}" target="_blank">Dosyayı Görüntüle</a>
+                <a href="{{ asset('storage/' . $form->component_electrical_test_file) }}" target="_blank" class="clickable">Dosyayı Görüntüle</a>
                 @endif
             </div>
 
@@ -501,7 +546,7 @@
                     <input type="file" class="form-control mt-2" name="component_measurement_file" @if($disabled) disabled @endif>
                 </div>
                 @if ($form->component_measurement_file)
-                <a href="{{ asset('storage/' . $form->component_measurement_file) }}" target="_blank">Dosyayı Görüntüle</a>
+                <a href="{{ asset('storage/' . $form->component_measurement_file) }}" target="_blank" class="clickable">Dosyayı Görüntüle</a>
                 @endif
             </div>
         </div>
@@ -518,7 +563,7 @@
                     <input type="file" class="form-control mt-2" name="cabling_mechanical_test_file" @if($disabled) disabled @endif>
                 </div>
                 @if ($form->cabling_mechanical_test_file)
-                <a href="{{ asset('storage/' . $form->cabling_mechanical_test_file) }}" target="_blank">Dosyayı Görüntüle</a>
+                <a href="{{ asset('storage/' . $form->cabling_mechanical_test_file) }}" target="_blank" class="clickable">Dosyayı Görüntüle</a>
                 @endif
             </div>
 
@@ -531,7 +576,7 @@
                     <input type="file" class="form-control mt-2" name="cabling_visual_inspection_file" @if($disabled) disabled @endif>
                 </div>
                 @if ($form->cabling_visual_inspection_file)
-                <a href="{{ asset('storage/' . $form->cabling_visual_inspection_file) }}" target="_blank">Dosyayı Görüntüle</a>
+                <a href="{{ asset('storage/' . $form->cabling_visual_inspection_file) }}" target="_blank" class="clickable">Dosyayı Görüntüle</a>
                 @endif
             </div>
 
@@ -544,7 +589,7 @@
                     <input type="file" class="form-control mt-2" name="cabling_electrical_test_file" @if($disabled) disabled @endif>
                 </div>
                 @if ($form->cabling_electrical_test_file)
-                <a href="{{ asset('storage/' . $form->cabling_electrical_test_file) }}" target="_blank">Dosyayı Görüntüle</a>
+                <a href="{{ asset('storage/' . $form->cabling_electrical_test_file) }}" target="_blank" class="clickable">Dosyayı Görüntüle</a>
                 @endif
             </div>
         </div>
@@ -561,7 +606,7 @@
                     <input type="file" class="form-control mt-2" name="suspected_supplier_list_file" @if($disabled) disabled @endif>
                 </div>
                 @if ($form->suspected_supplier_list_file)
-                <a href="{{ asset('storage/' . $form->suspected_supplier_list_file) }}" target="_blank">Dosyayı Görüntüle</a>
+                <a href="{{ asset('storage/' . $form->suspected_supplier_list_file) }}" target="_blank" class="clickable">Dosyayı Görüntüle</a>
                 @endif
             </div>
 
@@ -574,7 +619,7 @@
                     <input type="file" class="form-control mt-2" name="suspected_traceability_file" @if($disabled) disabled @endif>
                 </div>
                 @if ($form->suspected_traceability_file)
-                <a href="{{ asset('storage/' . $form->suspected_traceability_file) }}" target="_blank">Dosyayı Görüntüle</a>
+                <a href="{{ asset('storage/' . $form->suspected_traceability_file) }}" target="_blank" class="clickable">Dosyayı Görüntüle</a>
                 @endif
             </div>
 
@@ -587,7 +632,7 @@
                     <input type="file" class="form-control mt-2" name="suspected_fake_packaging_file" @if($disabled) disabled @endif>
                 </div>
                 @if ($form->suspected_fake_packaging_file)
-                <a href="{{ asset('storage/' . $form->suspected_fake_packaging_file) }}" target="_blank">Dosyayı Görüntüle</a>
+                <a href="{{ asset('storage/' . $form->suspected_fake_packaging_file) }}" target="_blank" class="clickable">Dosyayı Görüntüle</a>
                 @endif
             </div>
         </div>
@@ -770,8 +815,20 @@
 <script src="https://unpkg.com/html2pdf.js@0.9.2/dist/html2pdf.bundle.js"></script>
 <script>
     document.getElementById("download-pdf").addEventListener("click", function () {
-        // Yazdırma penceresini aç
+        // Modal içeriğini geçici olarak sayfaya ekle
+        const modalContent = document.querySelector("#dynamicFormModal .modal-body").innerHTML;
+        const printArea = document.getElementById("printArea");
+        
+        // Geçici yazdırma alanını doldur
+        printArea.innerHTML = modalContent;
+        printArea.style.display = "block";
+
+        // Yazdırma işlemini başlat
         window.print();
+
+        // Yazdırma sonrası geçici alanı temizle
+        printArea.style.display = "none";
+        printArea.innerHTML = "";
     });
 </script>
 

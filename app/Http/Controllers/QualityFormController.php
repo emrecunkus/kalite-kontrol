@@ -170,7 +170,7 @@ class QualityFormController extends Controller
                 'calibration_equipment' => $validatedData['calibration_equipment'] ?? null,
                 'calibration_equipment_file' => $uploadedFiles['calibration_equipment_file'] ?? null,
                 'electrical_optical_test' => $validatedData['electrical_optical_test'] ?? null,
-                'electrical_optical_test_file' => $validatedData['electrical_optical_test_file'] ?? null,
+                'electrical_optical_test_file' => $uploadedFiles['electrical_optical_test_file'] ?? null,
                 'supplier_measurement' => $validatedData['supplier_measurement'] ?? null,
                 'supplier_measurement_file' => $uploadedFiles['supplier_measurement_file'] ?? null,
                 'environmental_conditions' => $validatedData['environmental_conditions'] ?? null,
@@ -688,10 +688,10 @@ class QualityFormController extends Controller
 
         if ($form) {
             $form->delete(); // Formu veritabanından siliyoruz
-            return redirect()->route('technician.rejected_forms')->with('success', 'Form başarıyla silindi.');
+            return redirect()->back()->with('success', 'Form başarıyla silindi.');
         }
 
-        return redirect()->route('technician.rejected_forms')->with('error', 'Form bulunamadı.');
+        return redirect()->back()->with('error', 'Form bulunamadı.');
     }
 
 }

@@ -70,6 +70,40 @@
             </div>
         </div>
 
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const batchQuantityInput = document.getElementById("batch_quantity");
+                const inspectedQuantityInput = document.getElementById("inspected_quantity");
+            
+                const sampleSizeTable = [
+                    { min: 1, max: 25, sampleSize: 5 },
+                    { min: 26, max: 150, sampleSize: 20 },
+                    { min: 151, max: 280, sampleSize: 32 },
+                    { min: 281, max: 500, sampleSize: 50 },
+                    { min: 501, max: 1200, sampleSize: 80 },
+                    { min: 1201, max: 3200, sampleSize: 125 },
+                    { min: 3201, max: 10000, sampleSize: 200 },
+                    { min: 10001, max: 35000, sampleSize: 315 },
+                    { min: 35001, max: 150000, sampleSize: 500 },
+                    { min: 150001, max: Infinity, sampleSize: 800 },
+                ];
+            
+                batchQuantityInput.addEventListener("input", function () {
+                    const batchQuantity = parseInt(this.value);
+            
+                    if (!isNaN(batchQuantity)) {
+                        const sample = sampleSizeTable.find(
+                            range => batchQuantity >= range.min && batchQuantity <= range.max
+                        );
+            
+                        inspectedQuantityInput.value = sample ? sample.sampleSize : 0;
+                    } else {
+                        inspectedQuantityInput.value = "";
+                    }
+                });
+            });
+            </script>
+
         <div class="row mb-3">
             <div class="col-md-6">
                 <label for="batch_quantity" class="form-label">Partide Gelen Parça Miktarı</label>
@@ -77,10 +111,8 @@
             </div>
             <div class="col-md-6">
                 <label for="inspected_quantity" class="form-label">Kontrol Edilen Parça Miktarı</label>
-                <input type="number" class="form-control" id="inspected_quantity" name="inspected_quantity" required>
+                <input type="number" class="form-control" id="inspected_quantity" name="inspected_quantity" readonly>
             </div>
-
-       
         </div>
 
         <!-- Modal Çağırma Butonu -->
@@ -103,7 +135,7 @@
                 <input type="radio" name="technical_drawing_qdms" value="evet" id="qdms_evet"> Evet
                 <input type="radio" name="technical_drawing_qdms" value="hayır" id="qdms_hayir"> Hayır
                 <input type="radio" name="technical_drawing_qdms" value="gd" id="qdms_gd"> G/D
-                <input type="file" class="form-control mt-2" name="technical_drawing_qdms_file">
+                <input type="file" class="form-control mt-2 upload-field" name="technical_drawing_qdms_file">
             </div>
         </div>
 
@@ -114,7 +146,7 @@
                 <input type="radio" name="mechanical_measurements" value="evet"> Evet
                 <input type="radio" name="mechanical_measurements" value="hayır"> Hayır
                 <input type="radio" name="mechanical_measurements" value="gd"> G/D
-                <input type="file" class="form-control mt-2" name="mechanical_measurements_file">
+                <input type="file" class="form-control mt-2 upload-field" name="mechanical_measurements_file">
             </div>
         </div>
 
@@ -124,7 +156,7 @@
                 <input type="radio" name="calibration_equipment" value="evet"> Evet
                 <input type="radio" name="calibration_equipment" value="hayır"> Hayır
                 <input type="radio" name="calibration_equipment" value="gd"> G/D
-                <input type="file" class="form-control mt-2" name="calibration_equipment_file">
+                <input type="file" class="form-control mt-2 upload-field" name="calibration_equipment_file">
             </div>
         </div>
 
@@ -134,7 +166,7 @@
                 <input type="radio" name="electrical_optical_test" value="evet"> Evet
                 <input type="radio" name="electrical_optical_test" value="hayır"> Hayır
                 <input type="radio" name="electrical_optical_test" value="gd"> G/D
-                <input type="file" class="form-control mt-2" name="electrical_optical_test_file">
+                <input type="file" class="form-control mt-2 upload-field" name="electrical_optical_test_file">
             </div>
         </div>
 
@@ -144,7 +176,7 @@
                 <input type="radio" name="supplier_measurement" value="evet"> Evet
                 <input type="radio" name="supplier_measurement" value="hayır"> Hayır
                 <input type="radio" name="supplier_measurement" value="gd"> G/D
-                <input type="file" class="form-control mt-2" name="supplier_measurement_file">
+                <input type="file" class="form-control mt-2 upload-field" name="supplier_measurement_file">
             </div>
         </div>
 
@@ -154,7 +186,7 @@
                 <input type="radio" name="environmental_conditions" value="evet"> Evet
                 <input type="radio" name="environmental_conditions" value="hayır"> Hayır
                 <input type="radio" name="environmental_conditions" value="gd"> G/D
-                <input type="file" class="form-control mt-2" name="environmental_conditions_file">
+                <input type="file" class="form-control mt-2 upload-field" name="environmental_conditions_file">
             </div>
         </div>
 
@@ -164,7 +196,7 @@
                 <input type="radio" name="special_process_tests" value="evet"> Evet
                 <input type="radio" name="special_process_tests" value="hayır"> Hayır
                 <input type="radio" name="special_process_tests" value="gd"> G/D
-                <input type="file" class="form-control mt-2" name="special_process_tests_file">
+                <input type="file" class="form-control mt-2 upload-field" name="special_process_tests_file">
             </div>
         </div>
 
@@ -174,7 +206,7 @@
                 <input type="radio" name="quality_conformance_certificate" value="evet"> Evet
                 <input type="radio" name="quality_conformance_certificate" value="hayır"> Hayır
                 <input type="radio" name="quality_conformance_certificate" value="gd"> G/D
-                <input type="file" class="form-control mt-2" name="quality_conformance_certificate_file">
+                <input type="file" class="form-control mt-2 upload-field" name="quality_conformance_certificate_file">
             </div>
         </div>
 
@@ -184,7 +216,7 @@
                 <input type="radio" name="shipping_packaging" value="evet"> Evet
                 <input type="radio" name="shipping_packaging" value="hayır"> Hayır
                 <input type="radio" name="shipping_packaging" value="gd"> G/D
-                <input type="file" class="form-control mt-2" name="shipping_packaging_file">
+                <input type="file" class="form-control mt-2 upload-field" name="shipping_packaging_file">
             </div>
         </div>
 
@@ -194,7 +226,7 @@
                 <input type="radio" name="counterfeit_suspected" value="evet"> Evet
                 <input type="radio" name="counterfeit_suspected" value="hayır"> Hayır
                 <input type="radio" name="counterfeit_suspected" value="gd"> G/D
-                <input type="file" class="form-control mt-2" name="counterfeit_suspected_file">
+                <input type="file" class="form-control mt-2 upload-field" name="counterfeit_suspected_file">
             </div>
         </div>
 
@@ -205,7 +237,7 @@
                 <input type="radio" name="shelf_life" value="evet"> Evet
                 <input type="radio" name="shelf_life" value="hayır"> Hayır
                 <input type="radio" name="shelf_life" value="gd"> G/D
-                <input type="file" class="form-control mt-2" name="shelf_life_file">
+                <input type="file" class="form-control mt-2 upload-field" name="shelf_life_file">
             </div>
         </div>
 
@@ -241,7 +273,7 @@
                     <input type="radio" name="mechanical_raw_material" value="evet"> Evet
                     <input type="radio" name="mechanical_raw_material" value="hayır"> Hayır
                     <input type="radio" name="mechanical_raw_material" value="gd"> G/D
-                    <input type="file" class="form-control mt-2" name="mechanical_raw_material_file">
+                    <input type="file" class="form-control mt-2 upload-field" name="mechanical_raw_material_file">
                 </div>
             </div>
 
@@ -251,7 +283,7 @@
                     <input type="radio" name="mechanical_paint" value="evet"> Evet
                     <input type="radio" name="mechanical_paint" value="hayır"> Hayır
                     <input type="radio" name="mechanical_paint" value="gd"> G/D
-                    <input type="file" class="form-control mt-2" name="mechanical_paint_file">
+                    <input type="file" class="form-control mt-2 upload-field" name="mechanical_paint_file">
                 </div>
             </div>
 
@@ -261,7 +293,7 @@
                     <input type="radio" name="mechanical_exterior" value="evet"> Evet
                     <input type="radio" name="mechanical_exterior" value="hayır"> Hayır
                     <input type="radio" name="mechanical_exterior" value="gd"> G/D
-                    <input type="file" class="form-control mt-2" name="mechanical_exterior_file">
+                    <input type="file" class="form-control mt-2 upload-field" name="mechanical_exterior_file">
                 </div>
             </div>
 
@@ -271,7 +303,7 @@
                     <input type="radio" name="mechanical_welding_documents" value="evet"> Evet
                     <input type="radio" name="mechanical_welding_documents" value="hayır"> Hayır
                     <input type="radio" name="mechanical_welding_documents" value="gd"> G/D
-                    <input type="file" class="form-control mt-2" name="mechanical_welding_documents_file">
+                    <input type="file" class="form-control mt-2 upload-field" name="mechanical_welding_documents_file">
                 </div>
             </div>
         </div>
@@ -286,7 +318,7 @@
                     <input type="radio" name="electronics_shipping" value="evet"> Evet
                     <input type="radio" name="electronics_shipping" value="hayır"> Hayır
                     <input type="radio" name="electronics_shipping" value="gd"> G/D
-                    <input type="file" class="form-control mt-2" name="electronics_shipping_file">
+                    <input type="file" class="form-control mt-2 upload-field" name="electronics_shipping_file">
                 </div>
             </div>
 
@@ -296,7 +328,7 @@
                     <input type="radio" name="electronics_pcb_certificate" value="evet"> Evet
                     <input type="radio" name="electronics_pcb_certificate" value="hayır"> Hayır
                     <input type="radio" name="electronics_pcb_certificate" value="gd"> G/D
-                    <input type="file" class="form-control mt-2" name="electronics_pcb_certificate_file">
+                    <input type="file" class="form-control mt-2 upload-field" name="electronics_pcb_certificate_file">
                 </div>
             </div>
 
@@ -306,7 +338,7 @@
                     <input type="radio" name="electronics_special_process" value="evet"> Evet
                     <input type="radio" name="electronics_special_process" value="hayır"> Hayır
                     <input type="radio" name="electronics_special_process" value="gd"> G/D
-                    <input type="file" class="form-control mt-2" name="electronics_special_process_file">
+                    <input type="file" class="form-control mt-2 upload-field" name="electronics_special_process_file">
                 </div>
             </div>
 
@@ -316,7 +348,7 @@
                     <input type="radio" name="electronics_pcb_mechanical" value="evet"> Evet
                     <input type="radio" name="electronics_pcb_mechanical" value="hayır"> Hayır
                     <input type="radio" name="electronics_pcb_mechanical" value="gd"> G/D
-                    <input type="file" class="form-control mt-2" name="electronics_pcb_mechanical_file">
+                    <input type="file" class="form-control mt-2 upload-field" name="electronics_pcb_mechanical_file">
                 </div>
             </div>
 
@@ -326,7 +358,7 @@
                     <input type="radio" name="electronics_visual_inspection" value="evet"> Evet
                     <input type="radio" name="electronics_visual_inspection" value="hayır"> Hayır
                     <input type="radio" name="electronics_visual_inspection" value="gd"> G/D
-                    <input type="file" class="form-control mt-2" name="electronics_visual_inspection_file">
+                    <input type="file" class="form-control mt-2 upload-field" name="electronics_visual_inspection_file">
                 </div>
             </div>
 
@@ -336,7 +368,7 @@
                     <input type="radio" name="electronics_electrical_test" value="evet"> Evet
                     <input type="radio" name="electronics_electrical_test" value="hayır"> Hayır
                     <input type="radio" name="electronics_electrical_test" value="gd"> G/D
-                    <input type="file" class="form-control mt-2" name="electronics_electrical_test_file">
+                    <input type="file" class="form-control mt-2 upload-field" name="electronics_electrical_test_file">
                 </div>
             </div>
         </div>
@@ -352,7 +384,7 @@
                     <input type="radio" name="component_shipping" value="hayır"> Hayır
                     <input type="radio" name="component_shipping" value="hayır"> Hayır
                     <input type="radio" name="component_shipping" value="gd"> G/D
-                    <input type="file" class="form-control mt-2" name="component_shipping_file">
+                    <input type="file" class="form-control mt-2 upload-field" name="component_shipping_file">
                 </div>
             </div>
 
@@ -362,7 +394,7 @@
                     <input type="radio" name="component_lot_certificate" value="evet"> Evet
                     <input type="radio" name="component_lot_certificate" value="hayır"> Hayır
                     <input type="radio" name="component_lot_certificate" value="gd"> G/D
-                    <input type="file" class="form-control mt-2" name="component_lot_certificate_file">
+                    <input type="file" class="form-control mt-2 upload-field" name="component_lot_certificate_file">
                 </div>
             </div>
 
@@ -372,7 +404,7 @@
                     <input type="radio" name="component_visual_inspection" value="evet"> Evet
                     <input type="radio" name="component_visual_inspection" value="hayır"> Hayır
                     <input type="radio" name="component_visual_inspection" value="gd"> G/D
-                    <input type="file" class="form-control mt-2" name="component_visual_inspection_file">
+                    <input type="file" class="form-control mt-2 upload-field" name="component_visual_inspection_file">
                 </div>
             </div>
 
@@ -382,7 +414,7 @@
                     <input type="radio" name="component_electrical_test" value="evet"> Evet
                     <input type="radio" name="component_electrical_test" value="hayır"> Hayır
                     <input type="radio" name="component_electrical_test" value="gd"> G/D
-                    <input type="file" class="form-control mt-2" name="component_electrical_test_file">
+                    <input type="file" class="form-control mt-2 upload-field" name="component_electrical_test_file">
                 </div>
             </div>
 
@@ -392,7 +424,7 @@
                     <input type="radio" name="component_measurement" value="evet"> Evet
                     <input type="radio" name="component_measurement" value="hayır"> Hayır
                     <input type="radio" name="component_measurement" value="gd"> G/D
-                    <input type="file" class="form-control mt-2" name="component_measurement_file">
+                    <input type="file" class="form-control mt-2 upload-field" name="component_measurement_file">
                 </div>
             </div>
         </div>
@@ -407,7 +439,7 @@
                     <input type="radio" name="cabling_mechanical_test" value="evet"> Evet
                     <input type="radio" name="cabling_mechanical_test" value="hayır"> Hayır
                     <input type="radio" name="cabling_mechanical_test" value="gd"> G/D
-                    <input type="file" class="form-control mt-2" name="cabling_mechanical_test_file">
+                    <input type="file" class="form-control mt-2 upload-field" name="cabling_mechanical_test_file">
                 </div>
             </div>
 
@@ -417,7 +449,7 @@
                     <input type="radio" name="cabling_visual_inspection" value="evet"> Evet
                     <input type="radio" name="cabling_visual_inspection" value="hayır"> Hayır
                     <input type="radio" name="cabling_visual_inspection" value="gd"> G/D
-                    <input type="file" class="form-control mt-2" name="cabling_visual_inspection_file">
+                    <input type="file" class="form-control mt-2 upload-field" name="cabling_visual_inspection_file">
                 </div>
             </div>
 
@@ -427,7 +459,7 @@
                     <input type="radio" name="cabling_electrical_test" value="evet"> Evet
                     <input type="radio" name="cabling_electrical_test" value="hayır"> Hayır
                     <input type="radio" name="cabling_electrical_test" value="gd"> G/D
-                    <input type="file" class="form-control mt-2" name="cabling_electrical_test_file">
+                    <input type="file" class="form-control mt-2 upload-field" name="cabling_electrical_test_file">
                 </div>
             </div>
         </div>
@@ -442,7 +474,7 @@
                     <input type="radio" name="suspected_supplier_list" value="evet"> Evet
                     <input type="radio" name="suspected_supplier_list" value="hayır"> Hayır
                     <input type="radio" name="suspected_supplier_list" value="gd"> G/D
-                    <input type="file" class="form-control mt-2" name="suspected_supplier_list_file">
+                    <input type="file" class="form-control mt-2 upload-field" name="suspected_supplier_list_file">
                 </div>
             </div>
 
@@ -452,7 +484,7 @@
                     <input type="radio" name="suspected_traceability" value="evet"> Evet
                     <input type="radio" name="suspected_traceability" value="hayır"> Hayır
                     <input type="radio" name="suspected_traceability" value="gd"> G/D
-                    <input type="file" class="form-control mt-2" name="suspected_traceability_file">
+                    <input type="file" class="form-control mt-2 upload-field" name="suspected_traceability_file">
                 </div>
             </div>
 
@@ -462,7 +494,7 @@
                     <input type="radio" name="suspected_fake_packaging" value="evet"> Evet
                     <input type="radio" name="suspected_fake_packaging" value="hayır"> Hayır
                     <input type="radio" name="suspected_fake_packaging" value="gd"> G/D
-                    <input type="file" class="form-control mt-2" name="suspected_fake_packaging_file">
+                    <input type="file" class="form-control mt-2 upload-field" name="suspected_fake_packaging_file">
                 </div>
             </div>
         </div>
@@ -473,14 +505,14 @@
             <div class="col-md-6">
                 <label for="inspected_by" class="form-label">Kontrol Eden (Inspected By)</label>
                 <input type="text" class="form-control" id="inspected_by" name="inspected_by"
-                       value="{{ session('role') === 'tekniker' ? session('name') : '' }}" readonly>
+                       value="{{ (session('role') === 'tekniker' || (Route::currentRouteName() === 'tekniker.form' && session('name') === 'cagatay.cakir')) ? session('name') : '' }}" readonly>
             </div>
             
             <!-- Onaylayan (Approved By) Alanı -->
             <div class="col-md-6">
                 <label for="approved_by" class="form-label">Onaylayan (Approved By)</label>
                 <input type="text" class="form-control" id="approved_by" name="approved_by"
-                       value="{{ session('role') === 'mühendis' ? session('name') : '' }}" readonly>
+                       value="{{ session('role') === 'mühendis' && (Route::currentRouteName() === 'form.edit') ? session('name') : '' }}" readonly>
             </div>
         </div>
 

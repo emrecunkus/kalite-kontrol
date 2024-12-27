@@ -40,7 +40,10 @@ class LoginController extends Controller
                     'cagatay.cakir' => 'mühendis',
                     'muhammedemre.cunkus' => 'tekniker',
                     'cagatay.cakir' => 'mühendis',
+                    'sevgi.yaman' => 'mühendis',
                     'stajyer.bt' =>'mühendis',
+                    'atacaglar.kelek' =>'mühendis',
+                    'sule.husrevoglu' =>'mühendis',
                     
                 ];
 
