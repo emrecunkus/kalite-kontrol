@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\QualityForm;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\EngineerNotificationMail;
 
 class QualityFormController extends Controller
 {
@@ -233,6 +235,13 @@ class QualityFormController extends Controller
 
             ]);
             //dd($request->all());
+            $data = [
+                'name' => 'ASPİLSN KALİTE KONTROL PORTALI',
+                'message' => 'Onaya yeni bir GKK formu düşmüştür. Parça  Stok Numarası ' . $validatedData['part_stock_number'],
+            ];
+            Mail::to(['muhammedemre.cunkus@aspilsan.com', 'stajyer.bt@aspilsan.com'])
+            ->send(new EngineerNotificationMail($data));
+
 
             return redirect()->route('dashboard')->with('success', 'Form başarıyla oluşturuldu! Süreç ID: ' . $formattedSurecId);
         } catch (\Exception $e) {
